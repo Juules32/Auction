@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
+	"strings"
 
-	pb "github.com/Juules32/GRPC/proto"
+	pb "github.com/Juules32/Auction/proto"
 	"google.golang.org/grpc"
 )
 
@@ -20,9 +24,35 @@ func main() {
 
 	client := pb.NewAuctionClient(conn)
 
-	// Example: Bid
-	bidAmount := int32(50)
-	bidResponse, err := client.Bid(context.Background(), &pb.BidRequest{Amount: bidAmount})
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Enter command:")
+	for scanner.Scan() {
+
+		input := scanner.Text()
+		words := strings.Split(input, " ")
+
+		if words[0] == "" {
+			continue
+		}
+
+		switch strings.ToLower(words[0]) {
+		case "bid":
+			amount, err := strconv.Atoi(words[1])
+			if err != nil {
+				fmt.Println("Invalid bidding amount!")
+				continue
+			}
+			bid(client, int32(amount))
+		case "result":
+			result(client)
+		default:
+			fmt.Println("Invalid command. Valid commands: 'bid', 'result'")
+		}
+	}
+}
+
+func bid(client pb.AuctionClient, amount int32) {
+	bidResponse, err := client.Bid(context.Background(), &pb.BidRequest{Amount: amount})
 	if err != nil {
 		log.Fatalf("Error bidding: %v", err)
 	}
@@ -32,8 +62,9 @@ func main() {
 	} else {
 		fmt.Println("Bid failed:", bidResponse.Message)
 	}
+}
 
-	// Example: Result
+func result(client pb.AuctionClient) {
 	resultResponse, err := client.Result(context.Background(), &pb.ResultRequest{})
 	if err != nil {
 		log.Fatalf("Error getting result: %v", err)

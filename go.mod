@@ -3,7 +3,6 @@ module github.com/Juules32/Auction
 go 1.21.1
 
 require (
-	github.com/Juules32/GRPC v0.0.0-20231003134622-ff6f3d784e27
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 )
