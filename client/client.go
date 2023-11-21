@@ -1,85 +1,42 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
+	"log"
+
+	"google.golang.org/grpc"
 )
 
-const serverURL = "http://localhost:8080"
-
-// Bid sends a bid to the auction server.
-func Bid(amount int) (bool, string, error) {
-	url := serverURL + "/bid"
-
-	body, err := json.Marshal(amount)
-	if err != nil {
-		return false, "", err
-	}
-
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if err != nil {
-		return false, "", err
-	}
-	defer resp.Body.Close()
-
-	var response struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}
-
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return false, "", err
-	}
-
-	return response.Success, response.Message, nil
-}
-
-// Result retrieves the result of the auction from the server.
-func Result() (int, error) {
-	url := serverURL + "/result"
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		HighestBid int `json:"highestBid"`
-	}
-
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		return 0, err
-	}
-
-	return result.HighestBid, nil
-}
+const serverAddr = "localhost:8080"
 
 func main() {
-	// Example: Bid
-	bidAmount := 50
-	success, message, err := Bid(bidAmount)
+	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		log.Fatalf("Error connecting to server: %v", err)
+	}
+	defer conn.Close()
+
+	client := NewAuctionClient(conn)
+
+	// Example: Bid
+	bidAmount := int32(50)
+	bidResponse, err := client.Bid(context.Background(), &BidRequest{Amount: bidAmount})
+	if err != nil {
+		log.Fatalf("Error bidding: %v", err)
 	}
 
-	if success {
-		fmt.Println("Bid successful:", message)
+	if bidResponse.Success {
+		fmt.Println("Bid successful:", bidResponse.Message)
 	} else {
-		fmt.Println("Bid failed:", message)
+		fmt.Println("Bid failed:", bidResponse.Message)
 	}
 
 	// Example: Result
-	highestBid, err := Result()
+	resultResponse, err := client.Result(context.Background(), &ResultRequest{})
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		log.Fatalf("Error getting result: %v", err)
 	}
 
-	fmt.Println("Highest Bid:", highestBid)
+	fmt.Println("Highest Bid:", resultResponse.HighestBid)
 }
