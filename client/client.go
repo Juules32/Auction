@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	pb "github.com/Juules32/GRPC/proto"
 	"google.golang.org/grpc"
 )
 
@@ -17,11 +18,11 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := NewAuctionClient(conn)
+	client := pb.NewAuctionClient(conn)
 
 	// Example: Bid
 	bidAmount := int32(50)
-	bidResponse, err := client.Bid(context.Background(), &BidRequest{Amount: bidAmount})
+	bidResponse, err := client.Bid(context.Background(), &pb.BidRequest{Amount: bidAmount})
 	if err != nil {
 		log.Fatalf("Error bidding: %v", err)
 	}
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	// Example: Result
-	resultResponse, err := client.Result(context.Background(), &ResultRequest{})
+	resultResponse, err := client.Result(context.Background(), &pb.ResultRequest{})
 	if err != nil {
 		log.Fatalf("Error getting result: %v", err)
 	}

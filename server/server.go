@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	pb "github.com/Juules32/GRPC/proto"
 	"google.golang.org/grpc"
 )
 
@@ -14,17 +15,17 @@ type AuctionServer struct {
 }
 
 // Bid implements the Bid RPC method
-func (s *AuctionServer) Bid(ctx context.Context, req *BidRequest) (*BidResponse, error) {
+func (s *AuctionServer) Bid(ctx context.Context, req *pb.BidRequest) (*pb.BidResponse, error) {
 	if req.Amount > s.highestBid {
 		s.highestBid = req.Amount
-		return &BidResponse{Success: true, Message: "Bid successful"}, nil
+		return &pb.BidResponse{Success: true, Message: "Bid successful"}, nil
 	}
-	return &BidResponse{Success: false, Message: "Bid too low"}, nil
+	return &pb.BidResponse{Success: false, Message: "Bid too low"}, nil
 }
 
 // Result implements the Result RPC method
-func (s *AuctionServer) Result(ctx context.Context, req *ResultRequest) (*ResultResponse, error) {
-	return &ResultResponse{HighestBid: int32(s.highestBid)}, nil
+func (s *AuctionServer) Result(ctx context.Context, req *pb.ResultRequest) (*pb.ResultResponse, error) {
+	return &pb.ResultResponse{HighestBid: int32(s.highestBid)}, nil
 }
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	}
 
 	server := grpc.NewServer()
-	RegisterAuctionServer(server, &AuctionServer{})
+	pb.RegisterAuctionServer(server, &AuctionServer{})
 
 	fmt.Println("Auction server is running on :8080")
 
