@@ -1,0 +1,22 @@
+syntax = "proto3";
+option go_package = "github.com/Juules32/Auction/proto";
+
+service Auction {
+  rpc Bid(BidRequest) returns (BidResponse);
+  rpc Result(ResultRequest) returns (ResultResponse);
+}
+
+message BidRequest {
+  int32 amount = 1;
+}
+
+message BidResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ResultRequest {}
+
+message ResultResponse {
+  int32 highest_bid = 1;
+}
