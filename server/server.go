@@ -73,10 +73,7 @@ func main() {
 			break
 		}
 		fmt.Println(serverListener)
-		err = server.Serve(serverListener)
-		if err != nil {
-			fmt.Println("ddd", err)
-		}
+
 		time.Sleep(time.Second * 2)
 	}
 
@@ -97,6 +94,10 @@ func main() {
 		err = server.Serve(listener)
 		if err != nil {
 			fmt.Println("sss", err)
+		}
+		err = server.Serve(serverListener)
+		if err != nil {
+			fmt.Println("ddd", err)
 		}
 	}()
 
