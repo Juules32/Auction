@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net"
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Template auction items for flavor
 var templateAuctionItemNames = []string{
 	"Antique Vase",
 	"Vintage Watch",
@@ -25,98 +27,189 @@ var templateAuctionItemNames = []string{
 	"Designer Handbag",
 	"Rare Stamp Collection",
 	"Fine Wine",
+	"Ancient Manuscript",
+	"Space Exploration Artifact",
+	"Modern Sculpture",
+	"Historical Document",
+	"Exotic Gemstone",
+	"Musical Instrument",
+	"Scientific Invention Prototype",
+	"Vintage Camera",
+	"Luxury Yacht",
+	"Fossilized Dinosaur Bone",
+	"Exclusive Fashion Accessory",
+	"Limited Edition Chess Set",
+	"Artificial Intelligence Robot",
+	"Astronomical Telescope",
+	"Rare Whisky Collection",
+	"Japanese Samurai Sword",
+	"Gold Bullion Bars",
+	"High-End Audio System",
+	"Rare Gemstone Jewelry",
 }
 
 // AuctionServer implements the Auction gRPC service
 type AuctionServer struct {
-	highestBid int32
-	minimumBid int32
-	isActive   bool
-	itemName   string
+	HighestBid int32  `json:"HighestBid"`
+	MinimumBid int32  `json:"MinimumBid"`
+	IsActive   bool   `json:"IsActive"`
+	ItemName   string `json:"ItemName"`
 }
 
-func (s *AuctionServer) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
-
-	s.highestBid = req.HighestBid
-	s.isActive = req.IsActive
-	s.itemName = req.ItemName
-	s.minimumBid = req.MinimumBid
-	return &pb.UpdateResponse{}, nil
-}
+// Struct used to save and update information about the auction
+var auctionServer *AuctionServer
+var serverListener net.Listener
 
 // Bid implements the Bid RPC method
 func (s *AuctionServer) Bid(ctx context.Context, req *pb.BidRequest) (*pb.BidResponse, error) {
 
-	if !s.isActive {
+	// There must be an active auction
+	if !s.IsActive {
 		return &pb.BidResponse{Success: false, Message: "Auction inactive!"}, nil
 	}
 
-	if req.Amount > s.highestBid && req.Amount >= s.minimumBid {
-		s.highestBid = req.Amount
-		return &pb.BidResponse{Success: true, Message: "Bid successful"}, nil
+	// The amount must be higher than the highest bid
+	// or higher or equal to the minimum bid
+	if req.Amount <= s.HighestBid || req.Amount < s.MinimumBid {
+		return &pb.BidResponse{Success: false, Message: "Bid too low"}, nil
 	}
-	return &pb.BidResponse{Success: false, Message: "Bid too low"}, nil
+
+	s.HighestBid = req.Amount
+	go handleBackupReplicas(serverListener)
+	return &pb.BidResponse{Success: true, Message: "Bid successful"}, nil
 }
 
 // Result implements the Result RPC method
 func (s *AuctionServer) Result(ctx context.Context, req *pb.ResultRequest) (*pb.ResultResponse, error) {
-	return &pb.ResultResponse{HighestBid: int32(s.highestBid)}, nil
+	return &pb.ResultResponse{HighestBid: int32(s.HighestBid)}, nil
 }
 
 func main() {
-	auctionServer := &AuctionServer{}
-	stop := false
-	for !stop {
-		serverListener, err := net.Listen("tcp", "localhost:5050")
-		if err == nil {
-			serverListener.Close()
+
+	// Starts grpc server
+	server := grpc.NewServer()
+
+	// Initializes auction with default values
+	auctionServer = &AuctionServer{}
+
+	// Backup replicas go through this for loop until one becomes leader
+	for {
+		if becomesLeader() {
 			break
 		}
-		fmt.Println(serverListener)
+		receiveAuctionDataFromPrimaryReplica()
 
 		time.Sleep(time.Second * 2)
 	}
 
-	serverListener, err := net.Listen("tcp", "localhost:5050")
+	// Initializes the server listener on port 5050
+	var err error
+	serverListener, err = net.Listen("tcp", "localhost:5050")
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 		return
 	}
 	defer serverListener.Close()
-	fmt.Println(serverListener)
 
-	listener, err := net.Listen("tcp", "localhost:8080")
+	// Handles grpc requests from clients
+	go serveClients(server)
 
-	server := grpc.NewServer()
-
-	pb.RegisterAuctionServer(server, auctionServer)
+	// Continually sends data to backup replicas
 	go func() {
-		err = server.Serve(listener)
-		if err != nil {
-			fmt.Println("sss", err)
-		}
-		err = server.Serve(serverListener)
-		if err != nil {
-			fmt.Println("ddd", err)
+		for {
+			handleBackupReplicas(serverListener)
 		}
 	}()
 
+	// Handles text input from the terminal to perform various tasks
+	takeInputs(server)
+
+}
+
+func becomesLeader() bool {
+	// Tries to become primary replica by acquiring the 5050 port used for server communication
+	serverListener, err := net.Listen("tcp", "localhost:5050")
+	if err != nil {
+		return false
+	}
+	serverListener.Close()
+	fmt.Println("Primary replica has been found")
+	return true
+}
+
+func receiveAuctionDataFromPrimaryReplica() {
+	// Tries to dial up the primary replica
+	conn, err := net.Dial("tcp", "localhost:5050")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Receives JSON data from the primary replica
+	responseBuffer := make([]byte, 1024)
+	n, err := conn.Read(responseBuffer)
+	if err != nil {
+		fmt.Println("Error reading JSON data:", err)
+		return
+	}
+
+	// Decodes JSON data into AuctionServer struct
+	var receivedAuctionServer AuctionServer
+	err = json.Unmarshal(responseBuffer[:n], &receivedAuctionServer)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return
+	}
+
+	// Sets the received struct as the struct
+	auctionServer = &receivedAuctionServer
+	fmt.Println("Received auction data from primary replica:", auctionServer)
+
+	conn.Close()
+}
+
+func serveClients(server *grpc.Server) {
+	clientListener, err := net.Listen("tcp", "localhost:8080")
+
+	pb.RegisterAuctionServer(server, auctionServer)
+
+	// Continually serves client requests
 	go func() {
-		conn, err := grpc.Dial("localhost:5050", grpc.WithInsecure(), grpc.WithBlock())
+		err = server.Serve(clientListener)
 		if err != nil {
-			stop = true
+			fmt.Println("Error serving listener:", err)
 		}
-		client := pb.NewReplicationClient(conn)
-
-		updateResponse, err := client.Update(context.Background(), &pb.UpdateRequest{HighestBid: auctionServer.highestBid, MinimumBid: auctionServer.minimumBid, IsActive: auctionServer.isActive, ItemName: auctionServer.itemName})
-		fmt.Print(updateResponse)
-		conn.Close()
-		time.Sleep(time.Second * 2)
-
 	}()
 
 	fmt.Println("Auction server is running on localhost:8080")
+}
 
+func handleBackupReplicas(serverListener net.Listener) {
+
+	// Accepts dial
+	conn, err := serverListener.Accept()
+	if err != nil {
+		fmt.Println("Error accepting connection:", err)
+		return
+	}
+	defer conn.Close()
+
+	// Encodes the struct to JSON
+	jsonData, err := json.Marshal(auctionServer)
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+
+	// Sends encoded data back
+	_, err = conn.Write(jsonData)
+	if err != nil {
+		fmt.Println("Error sending response:", err)
+		return
+	}
+
+}
+
+func takeInputs(server *grpc.Server) {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Enter command:")
 	for scanner.Scan() {
@@ -124,46 +217,22 @@ func main() {
 
 		switch strings.ToLower(command) {
 		case "start":
-			auctionServer.highestBid = 0
-			auctionServer.minimumBid = int32(rand.Intn(100))
-			auctionServer.itemName = randomAuctionItemName()
-			auctionServer.isActive = true
-			fmt.Printf("Started new auction for %s starting at %d dollars\n", auctionServer.itemName, auctionServer.minimumBid)
+			auctionServer.HighestBid = 0
+			auctionServer.MinimumBid = int32(rand.Intn(100))
+			auctionServer.ItemName = templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
+			auctionServer.IsActive = true
+			fmt.Printf("Started new auction for %s starting at %d dollars\n", auctionServer.ItemName, auctionServer.MinimumBid)
 		case "end":
-			auctionServer.isActive = false
-			fmt.Printf("Ended auction with winning bid %d\n", auctionServer.highestBid)
+			auctionServer.IsActive = false
+			fmt.Printf("Ended auction with winning bid %d\n", auctionServer.HighestBid)
 		case "crash":
 			fmt.Println("Stopping gRPC server...")
 			server.GracefulStop()
 			return
 		case "print":
-			fmt.Print(auctionServer)
-		case "bootup":
-			auctionServer = &AuctionServer{}
-
-			listener, err = net.Listen("tcp", "localhost:8080")
-			if err != nil {
-				fmt.Println("Error starting server:", err)
-				return
-			}
-
-			server = grpc.NewServer()
-
-			pb.RegisterAuctionServer(server, auctionServer)
-			go func() {
-				err := server.Serve(listener)
-				if err != nil {
-					fmt.Println("Error serving gRPC:", err)
-				}
-			}()
-			fmt.Println("Auction server is running on localhost:8080")
-
+			fmt.Println(auctionServer)
 		default:
-			fmt.Println("Invalid command. Valid commands: 'start', 'end'")
+			fmt.Println("Invalid command. Valid commands: 'start', 'end', 'crash', 'print'")
 		}
 	}
-}
-
-func randomAuctionItemName() string {
-	return templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
 }

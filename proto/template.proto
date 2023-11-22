@@ -20,17 +20,3 @@ message ResultRequest {}
 message ResultResponse {
   int32 highest_bid = 1;
 }
-
-
-service Replication {
-  rpc Update(UpdateRequest) returns (UpdateResponse);
-}
-
-message UpdateRequest {
-  int32 highest_bid = 1;
-  int32 minimum_bid = 2;
-  bool is_active = 3;
-  string item_name = 4;
-}
-
-message UpdateResponse {}
