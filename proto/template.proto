@@ -18,5 +18,6 @@ message BidResponse {
 message ResultRequest {}
 
 message ResultResponse {
-  int32 highest_bid = 1;
+  bool isActive = 1;
+  int32 highest_bid = 2;
 }

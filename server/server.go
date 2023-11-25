@@ -5,10 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	pb "github.com/Juules32/Auction/proto"
@@ -59,9 +62,12 @@ type AuctionServer struct {
 // Struct used to save and update information about the auction
 var auctionServer *AuctionServer
 var serverListener net.Listener
+var mut sync.Mutex
 
 // Bid implements the Bid RPC method
 func (s *AuctionServer) Bid(ctx context.Context, req *pb.BidRequest) (*pb.BidResponse, error) {
+	mut.Lock()
+	defer mut.Unlock()
 
 	// There must be an active auction
 	if !s.IsActive {
@@ -75,16 +81,20 @@ func (s *AuctionServer) Bid(ctx context.Context, req *pb.BidRequest) (*pb.BidRes
 	}
 
 	s.HighestBid = req.Amount
-	go handleBackupReplicas(serverListener)
+	handleBackupReplicas(serverListener)
 	return &pb.BidResponse{Success: true, Message: "Bid successful"}, nil
 }
 
 // Result implements the Result RPC method
 func (s *AuctionServer) Result(ctx context.Context, req *pb.ResultRequest) (*pb.ResultResponse, error) {
-	return &pb.ResultResponse{HighestBid: int32(s.HighestBid)}, nil
+	mut.Lock()
+	defer mut.Unlock()
+
+	return &pb.ResultResponse{IsActive: s.IsActive, HighestBid: int32(s.HighestBid)}, nil
 }
 
 func main() {
+	writeToLogAndTerminal("Starting new server...")
 
 	// Starts grpc server
 	server := grpc.NewServer()
@@ -133,7 +143,7 @@ func becomesLeader() bool {
 		return false
 	}
 	serverListener.Close()
-	fmt.Println("Primary replica has been found")
+	writeToLogAndTerminal("Primary replica has been found")
 	return true
 }
 
@@ -162,7 +172,7 @@ func receiveAuctionDataFromPrimaryReplica() {
 
 	// Sets the received struct as the struct
 	auctionServer = &receivedAuctionServer
-	fmt.Println("Received auction data from primary replica:", auctionServer)
+	writeToLogAndTerminal("Backup replica receives auction data from primary replica: " + auctionDataString())
 
 	conn.Close()
 }
@@ -180,7 +190,7 @@ func serveClients(server *grpc.Server) {
 		}
 	}()
 
-	fmt.Println("Auction server is running on localhost:8080")
+	writeToLogAndTerminal("Server is running on localhost:8080")
 }
 
 func handleBackupReplicas(serverListener net.Listener) {
@@ -221,18 +231,36 @@ func takeInputs(server *grpc.Server) {
 			auctionServer.MinimumBid = int32(rand.Intn(100))
 			auctionServer.ItemName = templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
 			auctionServer.IsActive = true
-			fmt.Printf("Started new auction for %s starting at %d dollars\n", auctionServer.ItemName, auctionServer.MinimumBid)
+			writeToLogAndTerminal("Server started new auction for " + auctionServer.ItemName + " starting at " + strconv.Itoa(int(auctionServer.MinimumBid)) + " dollars")
 		case "end":
 			auctionServer.IsActive = false
-			fmt.Printf("Ended auction with winning bid %d\n", auctionServer.HighestBid)
+			writeToLogAndTerminal("Server ended auction with winning bid " + strconv.Itoa(int(auctionServer.HighestBid)))
 		case "crash":
-			fmt.Println("Stopping gRPC server...")
+			writeToLogAndTerminal("Stopping gRPC server...")
 			server.GracefulStop()
 			return
 		case "print":
-			fmt.Println(auctionServer)
+			writeToLogAndTerminal(auctionDataString())
 		default:
 			fmt.Println("Invalid command. Valid commands: 'start', 'end', 'crash', 'print'")
 		}
 	}
+}
+
+func auctionDataString() string {
+	return strconv.Itoa(int(auctionServer.HighestBid)) + " " + strconv.Itoa(int(auctionServer.MinimumBid)) + " " + strconv.FormatBool(auctionServer.IsActive) + " " + auctionServer.ItemName
+}
+
+func writeToLogAndTerminal(message string) {
+	fmt.Println(message)
+
+	f, err := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	log.SetOutput(f)
+
+	log.Println(message)
+
+	defer f.Close()
 }

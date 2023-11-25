@@ -16,6 +16,8 @@ import (
 const serverAddr = "localhost:8080"
 
 func main() {
+	writeToLogAndTerminal("Starting new client...")
+
 	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to server: %v", err)
@@ -44,6 +46,7 @@ func main() {
 			}
 			bid(client, int32(amount))
 		case "result":
+			writeToLogAndTerminal("Client queries auction result")
 			result(client)
 		default:
 			fmt.Println("Invalid command. Valid commands: 'bid', 'result'")
@@ -58,9 +61,9 @@ func bid(client pb.AuctionClient, amount int32) {
 	}
 
 	if bidResponse.Success {
-		fmt.Println("Bid successful:", bidResponse.Message)
+		writeToLogAndTerminal("Client bid successfully: " + bidResponse.Message)
 	} else {
-		fmt.Println("Bid failed:", bidResponse.Message)
+		writeToLogAndTerminal("Client bid failed: " + bidResponse.Message)
 	}
 }
 
@@ -70,5 +73,25 @@ func result(client pb.AuctionClient) {
 		log.Fatalf("Error getting result: %v", err)
 	}
 
-	fmt.Println("Highest Bid:", resultResponse.HighestBid)
+	if resultResponse.IsActive {
+		writeToLogAndTerminal("Highest Bid: " + strconv.Itoa(int(resultResponse.HighestBid)))
+
+	} else {
+		writeToLogAndTerminal("There is no active auction")
+	}
+
+}
+
+func writeToLogAndTerminal(message string) {
+	fmt.Println(message)
+
+	f, err := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	log.SetOutput(f)
+
+	log.Println(message)
+
+	defer f.Close()
 }

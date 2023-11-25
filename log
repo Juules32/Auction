@@ -1,0 +1,32 @@
+2023/11/25 10:55:14 Starting new server...
+2023/11/25 10:55:14 Primary replica has been found
+2023/11/25 10:55:14 Server is running on localhost:8080
+2023/11/25 10:55:27 Starting new server...
+2023/11/25 10:55:27 Backup replica receives auction data from primary replica: 0 0 false 
+2023/11/25 10:55:28 Starting new client...
+2023/11/25 10:55:29 Backup replica receives auction data from primary replica: 0 0 false 
+2023/11/25 10:55:31 Server started new auction for Luxury Yacht starting at 79 dollars
+2023/11/25 10:55:31 Backup replica receives auction data from primary replica: 0 79 true Luxury Yacht
+2023/11/25 10:55:33 Backup replica receives auction data from primary replica: 0 79 true Luxury Yacht
+2023/11/25 10:55:35 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:37 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:37 Client bid successfully: Bid successful
+2023/11/25 10:55:39 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:41 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:42 Starting new client...
+2023/11/25 10:55:43 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:45 Client bid failed: Bid too low
+2023/11/25 10:55:45 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:47 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
+2023/11/25 10:55:49 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
+2023/11/25 10:55:51 Client bid successfully: Bid successful
+2023/11/25 10:55:51 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
+2023/11/25 10:55:53 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
+2023/11/25 10:55:55 Client queries auction result
+2023/11/25 10:55:55 Highest Bid: 90
+2023/11/25 10:55:55 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
+2023/11/25 10:55:58 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
+2023/11/25 10:56:00 Primary replica has been found
+2023/11/25 10:56:00 Server is running on localhost:8080
+2023/11/25 10:56:04 Client queries auction result
+2023/11/25 10:56:04 Highest Bid: 90
