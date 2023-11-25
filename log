@@ -1,32 +1,30 @@
-2023/11/25 10:55:14 Starting new server...
-2023/11/25 10:55:14 Primary replica has been found
-2023/11/25 10:55:14 Server is running on localhost:8080
-2023/11/25 10:55:27 Starting new server...
-2023/11/25 10:55:27 Backup replica receives auction data from primary replica: 0 0 false 
-2023/11/25 10:55:28 Starting new client...
-2023/11/25 10:55:29 Backup replica receives auction data from primary replica: 0 0 false 
-2023/11/25 10:55:31 Server started new auction for Luxury Yacht starting at 79 dollars
-2023/11/25 10:55:31 Backup replica receives auction data from primary replica: 0 79 true Luxury Yacht
-2023/11/25 10:55:33 Backup replica receives auction data from primary replica: 0 79 true Luxury Yacht
-2023/11/25 10:55:35 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:37 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:37 Client bid successfully: Bid successful
-2023/11/25 10:55:39 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:41 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:42 Starting new client...
-2023/11/25 10:55:43 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:45 Client bid failed: Bid too low
-2023/11/25 10:55:45 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:47 Backup replica receives auction data from primary replica: 80 79 true Luxury Yacht
-2023/11/25 10:55:49 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
-2023/11/25 10:55:51 Client bid successfully: Bid successful
-2023/11/25 10:55:51 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
-2023/11/25 10:55:53 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
-2023/11/25 10:55:55 Client queries auction result
-2023/11/25 10:55:55 Highest Bid: 90
-2023/11/25 10:55:55 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
-2023/11/25 10:55:58 Backup replica receives auction data from primary replica: 90 79 true Luxury Yacht
-2023/11/25 10:56:00 Primary replica has been found
-2023/11/25 10:56:00 Server is running on localhost:8080
-2023/11/25 10:56:04 Client queries auction result
-2023/11/25 10:56:04 Highest Bid: 90
+2023/11/25 11:21:06 Starting new replica...
+2023/11/25 11:21:06 Primary replica has been found
+2023/11/25 11:21:06 Server is running on localhost:8080
+2023/11/25 11:21:10 Starting new replica...
+2023/11/25 11:21:17 Starting new replica...
+2023/11/25 11:21:30 Starting new client...
+2023/11/25 11:21:33 Server started new auction for Sports Memorabilia starting at 81 dollars
+2023/11/25 11:21:33 Backup replica receives auction data from primary replica: 0 81 true Sports Memorabilia
+2023/11/25 11:22:05 Primary replica has been found
+2023/11/25 11:22:05 Server is running on localhost:8080
+2023/11/25 11:22:05 Primary replica has been found
+2023/11/25 11:22:18 Starting new replica...
+2023/11/25 11:22:18 Primary replica has been found
+2023/11/25 11:22:18 Server is running on localhost:8080
+2023/11/25 11:22:20 Starting new replica...
+2023/11/25 11:22:24 Starting new replica...
+2023/11/25 11:22:27 Starting new client...
+2023/11/25 11:22:28 Server started new auction for Gold Bullion Bars starting at 41 dollars
+2023/11/25 11:22:28 Backup replica receives auction data from primary replica: 0 41 true Gold Bullion Bars
+2023/11/25 11:22:34 Client bid failed: Bid too low
+2023/11/25 11:22:36 Client bid successfully: Bid successful
+2023/11/25 11:22:36 Backup replica receives auction data from primary replica: 45 41 true Gold Bullion Bars
+2023/11/25 11:22:39 Backup replica receives auction data from primary replica: 46 41 true Gold Bullion Bars
+2023/11/25 11:22:39 Client bid successfully: Bid successful
+2023/11/25 11:22:40 Client bid successfully: Bid successful
+2023/11/25 11:22:40 Backup replica receives auction data from primary replica: 47 41 true Gold Bullion Bars
+2023/11/25 11:22:50 Primary replica has been found
+2023/11/25 11:22:50 Server is running on localhost:8080
+2023/11/25 11:22:51 Primary replica has been found
+2023/11/25 11:22:51 Server is running on localhost:8080

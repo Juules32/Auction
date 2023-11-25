@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	pb "github.com/Juules32/Auction/proto"
 	"google.golang.org/grpc"
@@ -94,7 +93,7 @@ func (s *AuctionServer) Result(ctx context.Context, req *pb.ResultRequest) (*pb.
 }
 
 func main() {
-	writeToLogAndTerminal("Starting new server...")
+	writeToLogAndTerminal("Starting new replica...")
 
 	// Starts grpc server
 	server := grpc.NewServer()
@@ -108,8 +107,6 @@ func main() {
 			break
 		}
 		receiveAuctionDataFromPrimaryReplica()
-
-		time.Sleep(time.Second * 2)
 	}
 
 	// Initializes the server listener on port 5050
@@ -123,13 +120,6 @@ func main() {
 
 	// Handles grpc requests from clients
 	go serveClients(server)
-
-	// Continually sends data to backup replicas
-	go func() {
-		for {
-			handleBackupReplicas(serverListener)
-		}
-	}()
 
 	// Handles text input from the terminal to perform various tasks
 	takeInputs(server)
@@ -231,6 +221,7 @@ func takeInputs(server *grpc.Server) {
 			auctionServer.MinimumBid = int32(rand.Intn(100))
 			auctionServer.ItemName = templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
 			auctionServer.IsActive = true
+			handleBackupReplicas(serverListener)
 			writeToLogAndTerminal("Server started new auction for " + auctionServer.ItemName + " starting at " + strconv.Itoa(int(auctionServer.MinimumBid)) + " dollars")
 		case "end":
 			auctionServer.IsActive = false
