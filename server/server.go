@@ -80,7 +80,7 @@ func (s *AuctionServer) Bid(ctx context.Context, req *pb.BidRequest) (*pb.BidRes
 	}
 
 	s.HighestBid = req.Amount
-	handleBackupReplicas(serverListener)
+	go handleBackupReplicas(serverListener)
 	return &pb.BidResponse{Success: true, Message: "Bid successful"}, nil
 }
 
@@ -222,12 +222,12 @@ func takeInputs(server *grpc.Server) {
 			auctionServer.MinimumBid = int32(rand.Intn(100))
 			auctionServer.ItemName = templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
 			auctionServer.IsActive = true
-			handleBackupReplicas(serverListener)
+			go handleBackupReplicas(serverListener)
 			writeToLogAndTerminal("Server started new auction for " + auctionServer.ItemName + " starting at " + strconv.Itoa(int(auctionServer.MinimumBid)) + " dollars")
 			mut.Unlock()
 		case "end":
 			auctionServer.IsActive = false
-			handleBackupReplicas(serverListener)
+			go handleBackupReplicas(serverListener)
 			writeToLogAndTerminal("Server ended auction with winning bid " + strconv.Itoa(int(auctionServer.HighestBid)))
 		case "crash":
 			writeToLogAndTerminal("Stopping gRPC server...")

@@ -1,30 +1,24 @@
-2023/11/25 11:21:06 Starting new replica...
-2023/11/25 11:21:06 Primary replica has been found
-2023/11/25 11:21:06 Server is running on localhost:8080
-2023/11/25 11:21:10 Starting new replica...
-2023/11/25 11:21:17 Starting new replica...
-2023/11/25 11:21:30 Starting new client...
-2023/11/25 11:21:33 Server started new auction for Sports Memorabilia starting at 81 dollars
-2023/11/25 11:21:33 Backup replica receives auction data from primary replica: 0 81 true Sports Memorabilia
-2023/11/25 11:22:05 Primary replica has been found
-2023/11/25 11:22:05 Server is running on localhost:8080
-2023/11/25 11:22:05 Primary replica has been found
-2023/11/25 11:22:18 Starting new replica...
-2023/11/25 11:22:18 Primary replica has been found
-2023/11/25 11:22:18 Server is running on localhost:8080
-2023/11/25 11:22:20 Starting new replica...
-2023/11/25 11:22:24 Starting new replica...
-2023/11/25 11:22:27 Starting new client...
-2023/11/25 11:22:28 Server started new auction for Gold Bullion Bars starting at 41 dollars
-2023/11/25 11:22:28 Backup replica receives auction data from primary replica: 0 41 true Gold Bullion Bars
-2023/11/25 11:22:34 Client bid failed: Bid too low
-2023/11/25 11:22:36 Client bid successfully: Bid successful
-2023/11/25 11:22:36 Backup replica receives auction data from primary replica: 45 41 true Gold Bullion Bars
-2023/11/25 11:22:39 Backup replica receives auction data from primary replica: 46 41 true Gold Bullion Bars
-2023/11/25 11:22:39 Client bid successfully: Bid successful
-2023/11/25 11:22:40 Client bid successfully: Bid successful
-2023/11/25 11:22:40 Backup replica receives auction data from primary replica: 47 41 true Gold Bullion Bars
-2023/11/25 11:22:50 Primary replica has been found
-2023/11/25 11:22:50 Server is running on localhost:8080
-2023/11/25 11:22:51 Primary replica has been found
-2023/11/25 11:22:51 Server is running on localhost:8080
+2023/11/25 11:39:50 Starting new replica...
+2023/11/25 11:39:50 Primary replica has been found
+2023/11/25 11:39:50 Server is running on localhost:8080
+2023/11/25 11:39:52 Starting new replica...
+2023/11/25 11:39:57 Starting new client...
+2023/11/25 11:39:58 Server started new auction for Space Exploration Artifact starting at 12 dollars
+2023/11/25 11:39:58 Backup replica receives auction data from primary replica: 0 12 true Space Exploration Artifact
+2023/11/25 11:40:03 Backup replica receives auction data from primary replica: 20 12 true Space Exploration Artifact
+2023/11/25 11:40:03 Client bid successfully: Bid successful
+2023/11/25 11:40:12 Starting new client...
+2023/11/25 11:40:21 Client bid failed: Bid too low
+2023/11/25 11:40:26 Client bid successfully: Bid successful
+2023/11/25 11:40:26 Backup replica receives auction data from primary replica: 25 12 true Space Exploration Artifact
+2023/11/25 11:40:31 Client queries auction result
+2023/11/25 11:40:31 Highest Bid: 25
+2023/11/25 11:40:48 Stopping gRPC server...
+2023/11/25 11:40:48 Primary replica has been found
+2023/11/25 11:40:48 Server is running on localhost:8080
+2023/11/25 11:40:59 Client queries auction result
+2023/11/25 11:40:59 Highest Bid: 25
+2023/11/25 11:41:04 Server ended auction with winning bid 25
+2023/11/25 11:41:15 Client bid failed: Auction inactive!
+2023/11/25 11:41:20 Client queries auction result
+2023/11/25 11:41:20 There is no active auction
