@@ -1,6 +1,6 @@
 # How to run this program
 
-### Running replica node(s):
+### Running replica node(s) (up to two):
 In a new terminal, run the command: ```go run server/server.go```
 
 ### Running client(s):
