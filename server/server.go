@@ -217,14 +217,17 @@ func takeInputs(server *grpc.Server) {
 
 		switch strings.ToLower(command) {
 		case "start":
+			mut.Lock()
 			auctionServer.HighestBid = 0
 			auctionServer.MinimumBid = int32(rand.Intn(100))
 			auctionServer.ItemName = templateAuctionItemNames[rand.Intn(len(templateAuctionItemNames)-1)]
 			auctionServer.IsActive = true
 			handleBackupReplicas(serverListener)
 			writeToLogAndTerminal("Server started new auction for " + auctionServer.ItemName + " starting at " + strconv.Itoa(int(auctionServer.MinimumBid)) + " dollars")
+			mut.Unlock()
 		case "end":
 			auctionServer.IsActive = false
+			handleBackupReplicas(serverListener)
 			writeToLogAndTerminal("Server ended auction with winning bid " + strconv.Itoa(int(auctionServer.HighestBid)))
 		case "crash":
 			writeToLogAndTerminal("Stopping gRPC server...")
